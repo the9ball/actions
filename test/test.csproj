@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Update="System.Memory" />
+    <PackageReference Include="System.Memory" Version="2.0" />
   </ItemGroup>
 
 </Project>

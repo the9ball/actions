@@ -1,1 +1,1 @@
-﻿Console.WriteLine(System.Memory<int>.Empty.Length.ToString());
+﻿Console.WriteLine(new System.Net.Http.HttpClient().GetType().FullName);

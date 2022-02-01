@@ -1,7 +1,7 @@
 <Project>
 
   <ItemGroup>
-    <PackageReference Update="System.Memory" Version="4.4.0-preview1-25305-02" />
+    <!-- <PackageReference Update="System.Memory" Version="4.4.0-preview1-25305-02" /> -->
   </ItemGroup>
 
 </Project>

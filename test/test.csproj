@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Net.Http" />
+    <PackageReference Update="System.Net.Http" />
   </ItemGroup>
 
 </Project>

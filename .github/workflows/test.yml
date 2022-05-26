@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - run: echo "${{ github.event.head_commit.message }}"
+      - run: echo MESSAGE_HEAD=$("${{ github.event.head_commit.message }}" | head -n1) >> $env:GITHUB_ENV
+      - run: echo "${{ env.MESSAGE_HEAD }}"
       - run: exit 0
         if: failure()

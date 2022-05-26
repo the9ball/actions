@@ -9,5 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - run: exit 0
-        if: failure()
+      - run: |
+          MESSAGE=$(echo "${{ github.event.head_commit.message }}" | head -n1)
+          PR_NUMBER=$(echo ${MESSAGE} | sed -E 's/^.*#([0-9]+) .*$/\1/')
+          PR_URL=https://github.com/${{ github.repository }}/pull/${PR_NUMBER}
+          echo "MESSAGE=${MESSAGE}" >> $GITHUB_ENV
+          echo "PR_URL=${PR_URL}" >> $GITHUB_ENV
+      - run: |
+          echo "${MESSAGE}"
+          echo "${PR_URL}"

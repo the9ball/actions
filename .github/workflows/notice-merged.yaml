@@ -1,0 +1,22 @@
+name: notice-merged
+on:
+  push:
+    branches:
+      - "master"
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Trim commit message
+      - uses: jwalton/gh-find-current-pr@v1
+        id: findPr
+        with:
+          state: all
+      - name: Notify
+        run: |
+          echo "${PR_TITLE}\n${PR_URL}"
+        env:
+          PR_TITLE: ${{ steps.findPr.outputs.title }}
+          PR_URL: https://github.com/${{ github.repository }}/pull/${{steps.findPr.outputs.number}}

@@ -1,52 +1,25 @@
 name: test
 on:
-  pull_request:
-    types:
-      - labeled
-      - synchronize
-      - opened
-      - reopened
-      - ready_for_review
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+env:
+  TARGET_BRANCH: master
 
 jobs:
-  test:
+  skip_ci:
+    if: github.event_name != 'workflow_dispatch' || github.ref_name == 'master'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    outputs:
-      TAG_EXISTS: "${{ steps.a_tag.outputs.A_TAG_EXISTS == 'true' || steps.b_tag.outputs.B_TAG_EXISTS == 'true' }}"
-      A_TAG_EXISTS: ${{ steps.a_tag.outputs.A_TAG_EXISTS }}
-      B_TAG_EXISTS: ${{ steps.b_tag.outputs.B_TAG_EXISTS }}
-      FILES: "${{ steps.a_tag.outputs.FILE }} ${{ steps.b_tag.outputs.FILE }}"
     steps:
-      - run: |
-          TAG_EXISTS=${{ contains(github.event.pull_request.labels.*.name, 'A') }}
-          echo "::set-output name=A_TAG_EXISTS::${TAG_EXISTS}"
-          if [[ "${TAG_EXISTS}" == "true" ]]; then
-            echo "::set-output name=FILE::a.txt"
-          fi
-        id: a_tag
-      - run: |
-          TAG_EXISTS=${{ contains(github.event.pull_request.labels.*.name, 'B') }}
-          echo "::set-output name=B_TAG_EXISTS::${TAG_EXISTS}"
-          if [[ "${TAG_EXISTS}" == "true" ]]; then
-            echo "::set-output name=FILE::b.txt"
-          fi
-        id: b_tag
+      - name: nop
+        if: false
+        run: exit 0
 
-  test2:
-    needs: ["test"]
+  test:
+    needs: skip_ci
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    env:
-      TAG_EXISTS: ${{ needs.test.outputs.TAG_EXISTS }}
-      A_TAG_EXISTS: ${{ needs.test.outputs.A_TAG_EXISTS }}
-      B_TAG_EXISTS: ${{ needs.test.outputs.B_TAG_EXISTS }}
-      FILES: ${{ needs.test.outputs.FILES }}
     steps:
-      - run: |
-          set -x
-          #export
-          echo ${{ env.TAG_EXISTS }}
-          echo ${{ env.A_TAG_EXISTS }}
-          echo ${{ env.B_TAG_EXISTS }}
-          echo ${{ env.FILES }}
+      - run: export

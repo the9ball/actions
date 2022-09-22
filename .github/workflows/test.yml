@@ -1,13 +1,20 @@
 name: test
 on:
-  push:
-    branches:
-      - "master"
+  pull_request:
 
 jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - run: exit 0
-        if: failure()
+      - run: |
+          comment=$(cat <<EOS
+          ## test comment
+
+          :bowing_man:
+          EOS
+          )
+          gh pr comment -b "${comment}" ${URL}
+        env:
+          URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ github.token }}

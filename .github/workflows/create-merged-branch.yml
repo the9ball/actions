@@ -25,8 +25,8 @@ jobs:
         run: git remote set-url origin https://github-actions:${{ github.token }}@github.com/${{ github.repository }}
       - name: push
         run: |
-          git branch -f temp-${{ github.run_id }}
-          git push origin temp-${{ github.run_id }}:${{ github.head_ref }}-merged
+          git branch --force temp-${{ github.run_id }}
+          git push --force origin temp-${{ github.run_id }}:${{ github.head_ref }}-merged
 
   delete_branch:
     runs-on: ubuntu-latest

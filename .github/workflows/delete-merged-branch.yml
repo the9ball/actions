@@ -1,11 +1,11 @@
-name: create-merged-branch
+name: delete-merged-branch
 on:
   pull_request:
     types:
       - closed
 
 jobs:
-  create_branch:
+  delete_branch:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

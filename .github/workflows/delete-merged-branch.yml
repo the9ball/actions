@@ -15,6 +15,6 @@ jobs:
           sparse-checkout-cone-mode: false
       - name: setup
         run: git remote set-url origin https://github-actions:${{ github.token }}@github.com/${{ github.repository }}
-      - name: push
+      - name: delete
         run: |
           git push --delete origin ${{ github.head_ref }}-merged

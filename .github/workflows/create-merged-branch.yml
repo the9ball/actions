@@ -15,7 +15,7 @@ jobs:
   create_branch:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: github.event.pull_request.merged == false
+    if: github.event.action != 'closed'
     steps:
       - uses: actions/checkout@v3
         with:
@@ -31,7 +31,7 @@ jobs:
   delete_branch:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: github.event.pull_request.merged == true
+    if: github.event.action == 'closed'
     steps:
       - uses: actions/checkout@v3
         with:

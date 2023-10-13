@@ -1,0 +1,44 @@
+name: create-merged-branch
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - closed
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  create_branch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event.pull_request.merged == false
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          sparse-checkout: .
+          sparse-checkout-cone-mode: false
+      - name: setup
+        run: git remote set-url origin https://github-actions:${{ github.token }}@github.com/${{ github.repository }}
+      - name: push
+        run: |
+          git branch -f temp-${{ github.run_id }}
+          git push origin temp-${{ github.run_id }}:${{ github.head_ref }}-merged
+
+  delete_branch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event.pull_request.merged == true
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          sparse-checkout: .
+          sparse-checkout-cone-mode: false
+      - name: setup
+        run: git remote set-url origin https://github-actions:${{ github.token }}@github.com/${{ github.repository }}
+      - name: delete
+        run: |
+          git push --delete origin ${{ github.head_ref }}-merged || :

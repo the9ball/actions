@@ -4,6 +4,10 @@ on:
     types:
       - closed
 
+concurrency:
+  group: merged-branch
+  cancel-in-progress: true
+
 jobs:
   delete_branch:
     runs-on: ubuntu-latest

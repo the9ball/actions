@@ -2,6 +2,10 @@ name: create-merged-branch
 on:
   pull_request:
 
+concurrency:
+  group: merged-branch
+  cancel-in-progress: true
+
 jobs:
   create_branch:
     runs-on: ubuntu-latest

@@ -19,7 +19,7 @@ jobs:
   create_branch:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: github.event.action != 'closed'
+    if: github.event.action != 'closed' && contains(github.event.pull_request.labels.*.name, 'create-merged-branch')
     steps:
       - uses: actions/checkout@v3
         with:
@@ -35,7 +35,7 @@ jobs:
   delete_branch:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: github.event.action == 'closed'
+    if: github.event.action == 'closed' && contains(github.event.pull_request.labels.*.name, 'create-merged-branch')
     steps:
       - name: setup
         run: |

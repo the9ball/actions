@@ -1,0 +1,17 @@
+name: test
+on:
+  push:
+    branches: [ test ]
+
+env:
+  TEST_ENV: "test3"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - run: echo "TEST_ENV=test1" | tee -a "$GITHUB_ENV"
+      - run: echo "${TEST_ENV}"
+        env:
+          TEST_ENV: "test2"

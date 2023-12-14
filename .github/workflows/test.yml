@@ -1,17 +1,20 @@
 name: test
 on:
   push:
-    branches: [ test ]
-
-env:
-  TEST_ENV: "test3"
+    branches: [ test* ]
+  pull_request:
+    branches: [ test* ]
+  workflow_dispatch:
+    inputs:
+      test-value:
+        description: 'test value'
+        required: false
+        type: string
+        default: null
 
 jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - run: echo "TEST_ENV=test1" | tee -a "$GITHUB_ENV"
-      - run: echo "${TEST_ENV}"
-        env:
-          TEST_ENV: "test2"
+      - run: echo "${{ inputs.test-value || github.head_ref || github.ref_name }}"

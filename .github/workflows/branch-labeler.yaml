@@ -9,7 +9,7 @@ on:
 
 jobs:
   call:
-    uses: the9ball/branch-labeler/.github/workflows/branch-labeler.yaml@v0.1.0
+    uses: the9ball/branch-labeler/.github/workflows/branch-labeler.yaml@7134883bf873facd836d9a9c2db1db70818eb338
     permissions:
       contents: write # for creating label
       pull-requests: write

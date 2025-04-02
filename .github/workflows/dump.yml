@@ -1,0 +1,14 @@
+name: dump
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  dump:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: environment
+        run: export
+      - name: context
+        run: echo '${{ toJSON(github) }}'

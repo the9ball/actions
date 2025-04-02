@@ -1,0 +1,19 @@
+name: milestone-setter
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - edited # for base branch change
+
+jobs:
+  call:
+    uses: the9ball/milestone-setter/.github/workflows/milestone-setter.yaml@v0.1.0
+    permissions:
+      contents: write # for creating label
+      pull-requests: write
+    with:
+      # Branch名を表す正規表現です。
+      # Bashの構文に準拠します。
+      branch_name_filter: '(feature-[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+|release/.*)'

@@ -6,14 +6,93 @@ on:
       - opened
       - reopened
       - edited # for base branch change
+      - labeled # for label change
+      - unlabeled # for label change
+      - synchronize # for commit change
+
+env:
+  # Branch名を表す正規表現です。
+  # Bashの構文に準拠します。
+  branch_name_filter: "(feature|release)/.*"
+  # ここで指定されたラベルが付けられたPRの場合はmilestoneを設定しません。
+  # 既に設定済みの場合は削除されます。
+  ignore_label: "ignore-milestone"
+
+defaults:
+  run:
+    shell: bash -euxo pipefail {0}
 
 jobs:
-  call:
-    uses: the9ball/milestone-setter/.github/workflows/milestone-setter.yaml@v0.1.0
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      IS_SET: ${{ steps.check_labels.outputs.IS_SET }}
+    steps:
+      - name: check labels
+        id: check_labels
+        env:
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+          IGNORE_LABEL: ${{ env.ignore_label }}
+        run: |
+          if [[ -z ${LABELS} ]]; then
+            # ラベルがなければ、マイルストーンを設定します。
+            echo "IS_SET=true" >> "${GITHUB_OUTPUT}"
+          else
+            # ラベルがある場合は、ignore_labelが付いているかどうかを確認します。
+            # LABELSはカンマ区切りの文字列なので改行に置換した上でgrep検索します。
+            echo "${LABELS}" | sed 's/,/\n/g' | grep -q "^${IGNORE_LABEL}$" \
+              && echo "IS_SET=false" >> "$GITHUB_OUTPUT" \
+              || echo "IS_SET=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  set_milestone:
+    needs: prepare
+    if: needs.prepare.outputs.IS_SET == 'true'
+    runs-on: ubuntu-latest
     permissions:
-      contents: write # for creating label
+      contents: write # for setting milestone
       pull-requests: write
-    with:
-      # Branch名を表す正規表現です。
-      # Bashの構文に準拠します。
-      branch_name_filter: "[feature|release]/.*"
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Check branch name
+        run: |
+          if [[ "${{ github.base_ref }}" =~ ${BRANCH_NAME_FILTER} ]]; then
+              echo "MATCHING=true" >> ${GITHUB_ENV}
+          else
+              echo "MATCHING=false" >> ${GITHUB_ENV}
+          fi
+        env:
+          BRANCH_NAME_FILTER: ${{ env.branch_name_filter }}
+      - name: Set environment
+        if: env.MATCHING == 'true'
+        run: |
+          base_ref="${{ github.base_ref }}"
+          base_ref="${base_ref//\//-}" # Replace slashes with dashes
+          echo TARGET_MILESTONE="${base_ref}" >> ${GITHUB_ENV}
+      - name: Create milestone
+        if: env.MATCHING == 'true'
+        run: |
+          if [[ ! $(gh api repos/${{ github.repository }}/milestones --jq '.[].title' | grep -w "^${TARGET_MILESTONE}$") ]]; then
+              gh api repos/${{ github.repository }}/milestones -f title="${TARGET_MILESTONE}" -f description="Created by ${{ github.workflow }}"
+          fi
+      - name: Set milestone to PR
+        if: env.MATCHING == 'true'
+        run: |
+          gh pr edit ${{ github.event.pull_request.number }} --milestone "${TARGET_MILESTONE}" || :
+
+  unset_milestone:
+    needs: prepare
+    if: needs.prepare.outputs.IS_SET == 'false'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # for setting milestone
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Unset milestone to PR
+        run: |
+          gh pr edit ${{ github.event.pull_request.number }} --milestone "" || :
